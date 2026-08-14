@@ -7,15 +7,18 @@ import apiRouter from './routes/api';
 dotenv.config();
 
 const app: Express = express();
-const PORT = process.env.PORT || 8000;
+const PORT = Number(process.env.PORT || 8000);
 
 const codespaceName = process.env.CODESPACE_NAME;
+const apiBaseUrl = codespaceName
+  ? `https://${codespaceName}-8000.app.github.dev`
+  : 'http://localhost:8000';
 const frontendUrl = codespaceName
   ? `https://${codespaceName}-5173.app.github.dev`
   : 'http://localhost:5173';
 
 app.use(cors({
-  origin: frontendUrl,
+  origin: [frontendUrl, 'http://localhost:5173', apiBaseUrl, 'http://localhost:8000'],
   credentials: true,
 }));
 app.use(express.json());
@@ -32,6 +35,7 @@ const startServer = async () => {
     await connectToDatabase();
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log(`API Base URL: ${apiBaseUrl}`);
       console.log(`Frontend URL: ${frontendUrl}`);
     });
   } catch (error) {
